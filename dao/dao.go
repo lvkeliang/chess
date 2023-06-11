@@ -11,7 +11,6 @@ var DB *gorm.DB
 
 // InitDB initializes the database connection and migration
 func InitDB() *gorm.DB {
-	//dsn := "LvKeliang:lkl12190711@tcp(120.79.27.213:3306)/chess?charset=utf8mb4&parseTime=True&loc=Local" // change this according to your own settings
 	dsn := "root:123456@tcp(localhost:3306)/chess?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
