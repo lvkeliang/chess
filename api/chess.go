@@ -176,6 +176,8 @@ func BoardWebSocket(h *model.Hub, db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		playingFlag := 0
+
 		boardID := uint(boardIDint)
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil) // 将请求升级为websocket连接
 		if err != nil {
@@ -233,12 +235,13 @@ func BoardWebSocket(h *model.Hub, db *gorm.DB) gin.HandlerFunc {
 				h.UpdateBoard <- board
 
 				if board.Playing == true {
+					playingFlag = 1
 					break
 				}
 			}
 		}
 
-		for {
+		for playingFlag == 1 {
 			messageType, message, err := conn.ReadMessage() // 从连接中读取一条消息
 
 			if err != nil {
@@ -274,13 +277,21 @@ func BoardWebSocket(h *model.Hub, db *gorm.DB) gin.HandlerFunc {
 					continue
 				}
 
-				isValid, err := service.IsValidMove(move, board)
+				isValid, event, err := service.IsValidMove(move, board)
 				if err != nil {
 					log.Println(err)
 					continue
 				}
 
 				if isValid {
+					if event == util.WhiteWin {
+						board.Winner = 1
+						playingFlag = 0
+					} else if event == util.BlackWin {
+						board.Winner = 0
+						playingFlag = 0
+					}
+
 					board.State, err = updateState(board.State, move.From, move.To) // 通过应用移动来更新状态
 					if err != nil {
 						log.Println(err)
@@ -310,9 +321,9 @@ func updateState(state []byte, from string, to string) ([]byte, error) {
 	}
 
 	fromIndexX := int(from[0] - 'a') // 计算状态字符串中 from 位置的索引
-	fromIndexY := int(from[1] - '0')
+	fromIndexY := int(from[1] - '1')
 	toIndexX := int(to[0] - 'a')
-	toIndexY := int(to[1] - '0') // 计算状态字符串中 to 位置的索引
+	toIndexY := int(to[1] - '1') // 计算状态字符串中 to 位置的索引
 	log.Printf("fx: %v\nfy: %v\ntx: %v\nty: %v\n", fromIndexX, fromIndexY, toIndexX, toIndexY)
 	service.PrintBoard(state)
 

@@ -14,4 +14,5 @@ type Board struct {
 	AudienceID string `gorm:"default:'{}'"`
 	State      []byte `gorm:"type:text(384);not null"` // the state of the board, represented by 64 characters
 	Turn       bool   `gorm:"not null"`                // the turn of the players, true for white, false for black
+	Winner     int    `gorm:"not null;default:-1"`     // 1为白方赢，0为黑方赢，-1为未决出胜负
 }

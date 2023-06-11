@@ -5,7 +5,6 @@ import (
 	util "Gone/uitl"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"log"
 	"time"
 )
 
@@ -36,7 +35,6 @@ func SetToken(user model.User, c *gin.Context) {
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Println("auth---")
 		// 从请求头中获取 token
 		//tokenString := c.GetHeader("Authorization")
 
